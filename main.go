@@ -1,15 +1,15 @@
-// Package main 实现了一个智能字幕处理工具。
+// Package main implements an intelligent subtitle processing tool.
 //
-// 该工具提供两大核心功能：
-//  1. 基于拼音相似度的智能字幕纠错
-//  2. 部分字幕内容向完整字幕文件的转移
+// This tool provides two core features:
+//  1. Intelligent subtitle correction based on pinyin similarity
+//  2. Transfer of partial subtitle content to full subtitle files
 //
-// 使用示例：
+// Usage examples:
 //
-//	# 智能修正字幕
+//	# Intelligent subtitle correction
 //	ime -i input.srt output.srt
 //
-//	# 转移字幕内容
+//	# Transfer subtitle content
 //	ime -t partial.srt full.srt output.srt
 package main
 
@@ -28,15 +28,15 @@ import (
 	"github.com/mozillazg/go-pinyin"
 )
 
-// 全局配置变量
+// Global configuration variables
 var (
-	// UserKeywords 存储用户自定义的关键词词典，用于纠错参考
+	// UserKeywords stores user-defined keyword dictionary for correction reference
 	UserKeywords string
-	
-	// BlacklistWords 存储黑名单词汇，这些词汇不会被修正
+
+	// BlacklistWords stores blacklist vocabulary that will not be corrected
 	BlacklistWords string
-	
-	// ManualFixes 存储手动配置的错误-正确映射表
+
+	// ManualFixes stores manually configured error-to-correct mapping
 	ManualFixes = map[string]string{}
 )
 
@@ -44,14 +44,14 @@ var (
 // 配置文件处理
 // ==========================================
 
-// LoadConfig 从指定路径加载配置文件。
+// LoadConfig loads configuration file from specified path.
 //
-// 配置文件支持三个主要配置节：
-//   - [UserKeywords]: 用户关键词词典
-//   - [BlacklistWords]: 黑名单词汇
-//   - [ManualFixes]: 手动修正映射（格式：错误=正确）
+// Configuration file supports three main sections:
+//   - [UserKeywords]: User keyword dictionary
+//   - [BlacklistWords]: Blacklist vocabulary
+//   - [ManualFixes]: Manual correction mapping (format: error=correct)
 //
-// 配置文件中以#开头的行会被视为注释，空行会被忽略。
+// Lines starting with # in config file are treated as comments, empty lines are ignored.
 func LoadConfig(configPath string) error {
 	file, err := os.Open(configPath)
 	if err != nil {
@@ -669,13 +669,13 @@ func WriteSRT(filePath string, blocks []*SubtitleBlock) error {
 //
 // 函数会根据序号匹配，自动替换对应位置的字幕内容。
 func TransferSubtitles(partialFile, fullFile, outputFile string) error {
-	fmt.Printf(">> 读取部分字幕文件: %s\n", partialFile)
+	fmt.Printf(">> Reading partial subtitle file: %s\n", partialFile)
 	partialBlocks, err := ParsePartialSRT(partialFile)
 	if err != nil {
 		return fmt.Errorf("读取部分字幕文件失败: %v", err)
 	}
 
-	fmt.Printf(">> 读取完整字幕文件: %s\n", fullFile)
+	fmt.Printf(">> Reading full subtitle file: %s\n", fullFile)
 	fullBlocks, err := ParseSRT(fullFile)
 	if err != nil {
 		return fmt.Errorf("读取完整字幕文件失败: %v", err)
@@ -687,13 +687,13 @@ func TransferSubtitles(partialFile, fullFile, outputFile string) error {
 		// 解析序号
 		idx, err := strconv.Atoi(strings.TrimSpace(block.Index))
 		if err != nil {
-			fmt.Printf("警告: 无法解析序号 '%s', 跳过\n", block.Index)
+			fmt.Printf("Warning: Unable to parse index '%s', skipping\n", block.Index)
 			continue
 		}
 		partialMap[idx] = block
 	}
 
-	fmt.Printf(">> 正在转移字幕内容...")
+	fmt.Printf(">> Transferring subtitle content...")
 	transferCount := 0
 
 	// 将部分字幕应用到完整版
@@ -711,9 +711,9 @@ func TransferSubtitles(partialFile, fullFile, outputFile string) error {
 		}
 	}
 
-	fmt.Printf("共转移了 %d 个字幕块\n", transferCount)
+	fmt.Printf("Transferred %d subtitle blocks\n", transferCount)
 
-	fmt.Printf(">> 写入输出文件: %s\n", outputFile)
+	fmt.Printf(">> Writing output file: %s\n", outputFile)
 	err = WriteSRT(outputFile, fullBlocks)
 	if err != nil {
 		return fmt.Errorf("写入输出文件失败: %v", err)
@@ -728,20 +728,20 @@ func TransferSubtitles(partialFile, fullFile, outputFile string) error {
 
 // printUsage 打印程序使用说明。
 func printUsage() {
-	fmt.Println("字幕处理工具 - 使用说明")
+	fmt.Println("Subtitle Processing Tool - Usage Instructions")
 	fmt.Println("====================")
 	fmt.Println()
-	fmt.Println("功能 1: 智能修正字幕 (使用 -i 参数)")
-	fmt.Println("  用法: ime -i <输入文件.srt> <输出文件.srt>")
-	fmt.Println("  示例: ime -i input.srt output.srt")
-	fmt.Println("  说明: 根据配置文件自动修正字幕中的错误")
+	fmt.Println("Feature 1: Intelligent subtitle correction (use -i parameter)")
+	fmt.Println("  Usage: ime -i <input.srt> <output.srt>")
+	fmt.Println("  Example: ime -i input.srt output.srt")
+	fmt.Println("  Description: Automatically correct subtitle errors based on config file")
 	fmt.Println()
-	fmt.Println("功能 2: 转移字幕内容 (使用 -t 参数)")
-	fmt.Println("  用法: ime -t <部分字幕.srt> <完整字幕.srt> <输出文件.srt>")
-	fmt.Println("  示例: ime -t partial.srt full.srt output.srt")
-	fmt.Println("  说明: 将部分字幕文件的内容应用到完整字幕文件中")
-	fmt.Println("        支持 [序号] 格式的部分字幕文件")
-	fmt.Println("        根据序号匹配,自动替换对应位置的字幕内容")
+	fmt.Println("Feature 2: Transfer subtitle content (use -t parameter)")
+	fmt.Println("  Usage: ime -t <partial.srt> <full.srt> <output.srt>")
+	fmt.Println("  Example: ime -t partial.srt full.srt output.srt")
+	fmt.Println("  Description: Apply partial subtitle file content to full subtitle file")
+	fmt.Println("        Supports partial subtitle files with [index] format")
+	fmt.Println("        Match by index and automatically replace corresponding subtitle content")
 	fmt.Println()
 }
 
@@ -765,8 +765,8 @@ func main() {
 	case "-i":
 		// 智能修正模式
 		if len(os.Args) < 4 {
-			fmt.Println("错误: -i 模式需要 2 个参数")
-			fmt.Println("用法: ime -i <输入文件.srt> <输出文件.srt>")
+			fmt.Println("Error: -i mode requires 2 parameters")
+			fmt.Println("Usage: ime -i <input.srt> <output.srt>")
 			return
 		}
 
@@ -777,7 +777,7 @@ func main() {
 		}
 
 		if err := LoadConfig(configPath); err != nil {
-			fmt.Printf("警告: 无法加载配置文件 %s: %v\n", configPath, err)
+			fmt.Printf("Warning: Unable to load config file %s: %v\n", configPath, err)
 			fmt.Println("请确保 config.txt 存在于程序目录或当前目录")
 			return
 		}
@@ -807,7 +807,7 @@ func main() {
 		
 		fmt.Printf("共修改了 %d 个字幕块\n", changeCount)
 		
-		fmt.Printf(">> 写入输出文件: %s\n", outputFile)
+		fmt.Printf(">> Writing output file: %s\n", outputFile)
 		err = WriteSRT(outputFile, blocks)
 		if err != nil {
 			fmt.Printf("写入错误: %v\n", err)
